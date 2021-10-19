@@ -9,6 +9,9 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
 });
 
+app.use('/users', require('./routes/users'));
+app.use('/movies', require('./routes/movies'));
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`App listening ${PORT}`);
