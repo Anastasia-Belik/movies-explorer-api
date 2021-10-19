@@ -70,11 +70,11 @@ module.exports.getMyInfo = (req, res, next) => {
 
 module.exports.updateMyProfile = (req, res, next) => {
   const userId = req.user._id;
-  const { name, about } = req.body;
+  const { name, email } = req.body;
 
   User.findByIdAndUpdate(
     userId,
-    { name, about },
+    { name, email },
     { runValidators: true, new: true },
   )
     .then((user) => sendResponse(res, user))
