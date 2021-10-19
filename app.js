@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { celebrate, Joi, errors } = require('celebrate');
+const validator = require('validator');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found');
@@ -17,8 +19,27 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+const isEmail = (value) => {
+  const result = validator.isEmail(value);
+  if (!result) {
+    throw new BadRequestError('Переданные данные некорректны. Введите email.');
+  }
+  return value;
+};
+
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().custom(isEmail),
+    password: Joi.string().required(),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().custom(isEmail),
+    password: Joi.string().required(),
+    name: Joi.string().required().min(2).max(30),
+  }),
+}), createUser);
 
 app.use(auth);
 
@@ -28,6 +49,8 @@ app.use('/movies', require('./routes/movies'));
 app.use('/', () => {
   throw new NotFoundError('Такой страницы не существует');
 });
+
+app.use(errors());
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
