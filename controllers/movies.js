@@ -1,4 +1,7 @@
 const Movie = require('../models/movies');
+const BadRequestError = require('../errors/bad-request');
+const ForbiddenError = require('../errors/forbidden');
+const NotFoundError = require('../errors/not-found');
 
 module.exports.getAllSavedMovies = (req, res, next) => {
   Movie.find({})
@@ -38,7 +41,7 @@ module.exports.createMovie = (req, res, next) => {
     .then((movie) => res.send({ movie }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new Error('Переданы некорректные данные при создании карточки'));
+        next(new BadRequestError('Переданы некорректные данные при создании карточки'));
       }
       next(err);
     });
@@ -51,10 +54,10 @@ module.exports.deleteMovieById = (req, res, next) => {
   Movie.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        throw new Error('Карточка с указанным id не найдена');
+        throw new NotFoundError('Карточка с указанным id не найдена');
       }
       if (userId !== movie.owner.toString()) {
-        throw new Error('Карточка создана не вами');
+        throw new ForbiddenError('Карточка создана не вами');
       }
       Movie.findByIdAndDelete(movieId)
         .then((deletedMovie) => {
@@ -65,7 +68,7 @@ module.exports.deleteMovieById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new Error('передан некорректный id'));
+        next(new BadRequestError('передан некорректный id'));
       }
 
       next(err);

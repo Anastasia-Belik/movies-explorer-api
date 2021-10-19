@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const ForbiddenError = require('../errors/forbidden');
 
 const { JWT_SECRET = 'qwerty' } = process.env;
 
@@ -6,7 +7,7 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new Error('Необходима авторизация');
+    throw new ForbiddenError('Необходима авторизация');
   }
 
   const token = authorization.replace('Bearer ', '');

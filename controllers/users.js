@@ -1,6 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found');
+const BadRequestError = require('../errors/bad-request');
+const UnauthorizedError = require('../errors/unauthorized-error');
+const ConflictError = require('../errors/conflict');
 
 const { NODE_ENV, JWT_SECRET = 'qwerty' } = process.env;
 
@@ -8,7 +12,7 @@ function sendResponse(res, user) {
   if (user) {
     res.send({ data: user });
   } else {
-    throw new Error('пользователь не найден');
+    throw new NotFoundError('пользователь не найден');
   }
 }
 
@@ -17,7 +21,7 @@ function findUserByIdInDb(userId, res, next) {
     .then((user) => sendResponse(res, user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new Error('передан некорректный id'));
+        next(new BadRequestError('передан некорректный id'));
       }
       next(err);
     });
@@ -37,10 +41,10 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new Error('Переданы некорректные данные при создании пользователя'));
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       }
       if (err.name === 'MongoServerError' && err.code === 11000) {
-        next(new Error('пользователь с таким email уже существует'));
+        next(new ConflictError('пользователь с таким email уже существует'));
       }
       next(err);
     });
@@ -59,7 +63,7 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch(() => {
-      next(new Error('передан неверный логин или пароль'));
+      next(new UnauthorizedError('передан неверный логин или пароль'));
     });
 };
 
@@ -80,7 +84,7 @@ module.exports.updateMyProfile = (req, res, next) => {
     .then((user) => sendResponse(res, user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new Error('Переданы некорректные данные при обновлении профиля'));
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       }
       next(err);
     });
