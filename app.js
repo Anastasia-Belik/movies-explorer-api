@@ -7,6 +7,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found');
 const BadRequestError = require('./errors/bad-request');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 
@@ -15,6 +16,8 @@ const app = express();
 mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
 });
+
+app.use(requestLogger);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -49,6 +52,8 @@ app.use('/movies', require('./routes/movies'));
 app.use('/', () => {
   throw new NotFoundError('Такой страницы не существует');
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
