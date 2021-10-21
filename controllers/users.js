@@ -22,8 +22,9 @@ function findUserByIdInDb(userId, res, next) {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('передан некорректный id'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 }
 
@@ -45,8 +46,9 @@ module.exports.createUser = (req, res, next) => {
       }
       if (err.name === 'MongoServerError' && err.code === 11000) {
         next(new ConflictError('пользователь с таким email уже существует'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -88,7 +90,8 @@ module.exports.updateMyProfile = (req, res, next) => {
       }
       if (err.name === 'MongoServerError' && err.code === 11000) {
         next(new ConflictError('пользователь с таким email уже существует'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };

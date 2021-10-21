@@ -42,8 +42,9 @@ module.exports.createMovie = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании карточки'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -63,8 +64,8 @@ module.exports.deleteMovieById = (req, res, next) => {
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         next(new BadRequestError('передан некорректный id'));
+      } else {
+        next(err);
       }
-
-      next(err);
     });
 };
