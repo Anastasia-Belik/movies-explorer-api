@@ -14,9 +14,9 @@ const isLink = (value) => {
   return value;
 };
 
-router.get('/', getAllSavedMovies);
+router.get('/movies/', getAllSavedMovies);
 
-router.post('/', celebrate({
+router.post('/movies/', celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
     director: Joi.string().required(),

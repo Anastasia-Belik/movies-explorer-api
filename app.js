@@ -3,12 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { celebrate, Joi, errors } = require('celebrate');
-const validator = require('validator');
-const { login, createUser } = require('./controllers/users');
+const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found');
-const BadRequestError = require('./errors/bad-request');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
@@ -48,32 +45,12 @@ app.use(requestLogger);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const isEmail = (value) => {
-  const result = validator.isEmail(value);
-  if (!result) {
-    throw new BadRequestError('Переданные данные некорректны. Введите email.');
-  }
-  return value;
-};
-
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().custom(isEmail),
-    password: Joi.string().required(),
-  }),
-}), login);
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().custom(isEmail),
-    password: Joi.string().required(),
-    name: Joi.string().required().min(2).max(30),
-  }),
-}), createUser);
+app.use(require('./routes/authorization'));
 
 app.use(auth);
 
-app.use('/users', require('./routes/users'));
-app.use('/movies', require('./routes/movies'));
+app.use(require('./routes/users'));
+app.use(require('./routes/movies'));
 
 app.use('/', () => {
   throw new NotFoundError('Такой страницы не существует');
