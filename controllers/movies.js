@@ -52,22 +52,16 @@ module.exports.deleteMovieById = (req, res, next) => {
   const userId = req.user._id;
 
   Movie.findById(movieId)
+    .orFail(new NotFoundError('Фильм с указанным id не найден'))
     .then((movie) => {
-      if (!movie) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
+      if (userId === movie.owner.toString()) {
+        return movie.remove()
+          .then(() => res.status(200).send({ message: 'Фильм удален' }));
       }
-      if (userId !== movie.owner.toString()) {
-        throw new ForbiddenError('Карточка создана не вами');
-      }
-      Movie.findByIdAndDelete(movieId)
-        .then((deletedMovie) => {
-          if (deletedMovie) {
-            res.send({ deletedMovie });
-          }
-        });
+      throw new ForbiddenError('Нельзя удалять чужой фильм');
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.kind === 'ObjectId') {
         next(new BadRequestError('передан некорректный id'));
       }
 
