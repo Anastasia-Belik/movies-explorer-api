@@ -86,6 +86,9 @@ module.exports.updateMyProfile = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       }
+      if (err.name === 'MongoServerError' && err.code === 11000) {
+        next(new ConflictError('пользователь с таким email уже существует'));
+      }
       next(err);
     });
 };
