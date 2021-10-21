@@ -8,7 +8,7 @@ const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, PATH_DB, NODE_ENV } = process.env;
 
 const app = express();
 
@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(NODE_ENV === 'production' ? PATH_DB : 'mongodb://localhost:27017/moviesdb', {
   useNewUrlParser: true,
 });
 
