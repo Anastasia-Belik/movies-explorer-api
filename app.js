@@ -13,7 +13,7 @@ const { PORT = 3000, PATH_DB, NODE_ENV } = process.env;
 const app = express();
 
 const allowedCors = [
-  'https://movies-explorer.belik.nomoredomains.monster/',
+  'https://movies-explorer.belik.nomoredomains.monster',
   'http://localhost:3000',
 ];
 
